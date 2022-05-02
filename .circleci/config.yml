@@ -284,6 +284,7 @@ workflows:
             parameters:
               architecture: ["ppc64le"]
           requires:
+            - "Building << matrix.architecture >> Image"
             - "Scan image via Snyk on amd64"
             - "Testing Python Code"
       - tagging-image:
