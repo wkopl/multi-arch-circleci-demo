@@ -273,10 +273,17 @@ workflows:
           name: "Pushing << matrix.architecture >> Image"
           matrix:
             parameters:
-              architecture: ["arm64", "amd64", "ppc64le"]
-              tested_archs: ["arm64", "amd64"]
+              architecture: ["arm64", "amd64"]
           requires:
             - "Testing << matrix.architecture >> Image"
+            - "Scan image via Snyk on amd64"
+            - "Testing Python Code"
+      - push-image:
+          name: "Pushing ppc64le Image"
+          matrix:
+            parameters:
+              architecture: ["ppc64le"]
+          requires:
             - "Scan image via Snyk on amd64"
             - "Testing Python Code"
       - tagging-image:
