@@ -33,6 +33,7 @@ commands:
   set-build-tools-env:
     description: "Set need environment variables needed for Build Tools"
     steps:
+      - checkout
       - run:
           name: Setup Build Tool Environment Variables
           command: |
