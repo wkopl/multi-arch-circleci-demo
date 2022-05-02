@@ -48,7 +48,7 @@ commands:
       - run: mkdir -p /tmp/docker-images/
       - run:
           name: Saving Docker Image
-          command: docker save --output /tmp/docker-images/${DOCKER_NAMESPACE}-${DOCKER_IMAGE}-$(docker version -f {{.Server.Arch}})-${CIRCLE_SHA1}.tar ${DOCKER_NAMESPACE}/${DOCKER_IMAGE}:$(docker version -f {{.Server.Arch}})-${CIRCLE_SHA1}
+          command: docker save --output /tmp/docker-images/${DOCKER_NAMESPACE}-${DOCKER_IMAGE}-$(docker version -f {{.Server.Arch}})-${VERSION}-${CIRCLE_SHA1}.tar ${DOCKER_NAMESPACE}/${DOCKER_IMAGE}:$(docker version -f {{.Server.Arch}})-${VERSION}-${CIRCLE_SHA1}
       - persist_to_workspace:
           root: /tmp
           paths:
@@ -61,7 +61,7 @@ commands:
           at: /tmp
       - run:
             name: Loading Docker Image
-            command: docker load --input /tmp/docker-images/${DOCKER_NAMESPACE}-${DOCKER_IMAGE}-$(docker version -f {{.Server.Arch}})-${CIRCLE_SHA1}.tar
+            command: docker load --input /tmp/docker-images/${DOCKER_NAMESPACE}-${DOCKER_IMAGE}-$(docker version -f {{.Server.Arch}})-${VERSION}-${CIRCLE_SHA1}.tar
 
   testing-docker-image:
     description: "Launches tests against a Docker image"
@@ -171,9 +171,11 @@ jobs:
       - set-build-tools-env
       - load-docker-image
       - snyk/scan:
-          docker-image-name: ${DOCKER_IMAGE}:${VERSION}-${CIRCLE_SHA1}
+          docker-image-name: ${DOCKER_NAMESPACE}/${DOCKER_IMAGE}:${ARCH}-${VERSION}-${CIRCLE_SHA1}
     environment:
       DOCKER_IMAGE: multi-arch-circleci-demo
+      DOCKER_NAMESPACE: jimcrowley
+      ARCH: << parameters.architecture >>
       
   build-image:
     parameters:
