@@ -175,7 +175,7 @@ jobs:
     environment:
       DOCKER_IMAGE: multi-arch-circleci-demo
       DOCKER_NAMESPACE: jimcrowley
-      ARCH: << parameters.architecture >>
+      ARCH: amd64
       
   build-image:
     parameters:
