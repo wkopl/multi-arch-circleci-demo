@@ -45,23 +45,23 @@ commands:
   save-docker-image:
     description: "Saves a Docker image for future Jobs"
     steps:
-      - run: mkdir -p /tmp/docker-images/
+      - run: mkdir -p /tmp/docker-images/$(docker version -f {{.Server.Arch}})
       - run:
           name: Saving Docker Image
-          command: docker save --output /tmp/docker-images/${DOCKER_NAMESPACE}-${DOCKER_IMAGE}-$(docker version -f {{.Server.Arch}})-${VERSION}-${CIRCLE_SHA1}.tar ${DOCKER_NAMESPACE}/${DOCKER_IMAGE}:$(docker version -f {{.Server.Arch}})-${VERSION}-${CIRCLE_SHA1}
+          command: docker save --output /tmp/docker-images/$(docker version -f {{.Server.Arch}})/${DOCKER_NAMESPACE}-${DOCKER_IMAGE}-$(docker version -f {{.Server.Arch}})-${VERSION}-${CIRCLE_SHA1}.tar ${DOCKER_NAMESPACE}/${DOCKER_IMAGE}:$(docker version -f {{.Server.Arch}})-${VERSION}-${CIRCLE_SHA1}
       - persist_to_workspace:
-          root: /tmp
+          root: /tmp/docker-images
           paths:
-            - docker-images/*
+            - $(docker version -f {{.Server.Arch}})/*
 
   load-docker-image:
     description: "Loads a Docker image"
     steps:
       - attach_workspace:
-          at: /tmp
+          at: /tmp/docker-images/$(docker version -f {{.Server.Arch}})
       - run:
             name: Loading Docker Image
-            command: docker load --input /tmp/docker-images/${DOCKER_NAMESPACE}-${DOCKER_IMAGE}-$(docker version -f {{.Server.Arch}})-${VERSION}-${CIRCLE_SHA1}.tar
+            command: docker load --input /tmp/docker-images/$(docker version -f {{.Server.Arch}})/${DOCKER_NAMESPACE}-${DOCKER_IMAGE}-$(docker version -f {{.Server.Arch}})-${VERSION}-${CIRCLE_SHA1}.tar
 
   testing-docker-image:
     description: "Launches tests against a Docker image"
