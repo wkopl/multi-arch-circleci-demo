@@ -83,7 +83,7 @@ commands:
           name: Run dgoss Test
           command: |
             export GOSS_OPTS="--format junit"
-            dgoss run -p 8080:8080 ${DOCKER_NAMESPACE}/${DOCKER_IMAGE}:$(docker version -f {{.Server.Arch}})-${CIRCLE_SHA1}  > ./goss-results/report.xml
+            dgoss run -p 8080:8080 ${DOCKER_NAMESPACE}/${DOCKER_IMAGE}:$(docker version -f {{.Server.Arch}})-${VERSION}-${CIRCLE_SHA1}  > ./goss-results/report.xml
       - store_test_results:
           path: goss-results
       - store_artifacts:
@@ -142,11 +142,13 @@ executors:
   arm64:
     machine:
       image: ubuntu-2004:current
+      docker_layer_caching: true
     resource_class: arm.medium
 
   amd64:
     machine:
       image: ubuntu-2004:current
+      docker_layer_caching: true
     resource_class: medium
 
   ppc64le:
@@ -257,7 +259,7 @@ workflows:
           name: "Testing << matrix.architecture >> Image"
           matrix:
             parameters:
-              architecture: ["arm64", "amd64", "ppc64le"]
+              architecture: ["arm64", "amd64"]
           requires:
             - "Building << matrix.architecture >> Image"
       - scan-image:
@@ -273,7 +275,8 @@ workflows:
             parameters:
               architecture: ["arm64", "amd64", "ppc64le"]
           requires:
-            - "Testing << matrix.architecture >> Image"
+            - "Testing amd64 Image"
+            - "Testing arm64 Image"
             - "Scan image via Snyk on amd64"
             - "Testing Python Code"
       - tagging-image:
