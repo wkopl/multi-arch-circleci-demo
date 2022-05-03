@@ -142,10 +142,10 @@ commands:
     steps:
       - run:
           name: Stop All Containers
-          command: docker rm -f $(docker ps -a -q) || echo "No Running Containers
+          command: docker rm -f $(docker ps -a -q) || echo "No Running Containers"
       - run:
           name: Remove All Containers
-          command: docker rmi -f $(docker images -q) || echo "No Images to Remove
+          command: docker rmi -f $(docker images -q) || echo "No Images to Remove"
       - run:
           name: Pull Multi-Arch Container
           command: docker pull ${DOCKER_NAMESPACE}/${DOCKER_IMAGE}:${VERSION}
