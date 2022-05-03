@@ -342,10 +342,10 @@ workflows:
           name: "Making and Push Manifests"
           requires:
             - "Tagging Images"
-      - deploy-container:
-          name: "Deploying Multi-Arch Container"
-          matrix:
-            parameters:
-              architecture: ["s390x", "amd64-deployment", "arm64-deployment"]
-          requires:
-            - "Making and Push Manifests"
+      # - deploy-container:
+      #     name: "Deploying Multi-Arch Container"
+      #     matrix:
+      #       parameters:
+      #         architecture: ["s390x", "amd64-deployment", "arm64-deployment"]
+      #     requires:
+      #       - "Making and Push Manifests"
