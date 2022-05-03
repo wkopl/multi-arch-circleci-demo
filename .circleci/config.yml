@@ -54,6 +54,7 @@ commands:
           root: /tmp
           paths:
             - docker-images/*
+      - run: rm -rf /tmp/docker-images/
 
   load-docker-image:
     description: "Loads a Docker image"
@@ -158,6 +159,10 @@ executors:
     machine: true
     resource_class: crowley-namespace/ppc64le
 
+  s390x:
+    machine: true
+    resource_class: crowley-namespace/s390x
+
 
 jobs:
   test-demo:
@@ -233,7 +238,7 @@ jobs:
       DOCKER_IMAGE: multi-arch-circleci-demo
       DOCKER_NAMESPACE: jimcrowley
       RELEASE_BRANCH: main
-      SUPPORTED_ARCHITECTURES: "amd64 arm64 ppc64le"
+      SUPPORTED_ARCHITECTURES: "amd64 arm64 ppc64le s390x"
 
   make-manifests:
     executor: amd64
@@ -245,7 +250,7 @@ jobs:
       DOCKER_IMAGE: multi-arch-circleci-demo
       DOCKER_NAMESPACE: jimcrowley
       RELEASE_BRANCH: main
-      SUPPORTED_ARCHITECTURES: "amd64 arm64 ppc64le"
+      SUPPORTED_ARCHITECTURES: "amd64 arm64 ppc64le s390x"
 
 workflows:
   demo:
@@ -257,7 +262,7 @@ workflows:
           name: "Building << matrix.architecture >> Image"
           matrix:
             parameters:
-              architecture: ["arm64", "amd64", "ppc64le"]
+              architecture: ["arm64", "amd64", "ppc64le", "s390x"]
       - test-image:
           name: "Testing << matrix.architecture >> Image"
           matrix:
@@ -282,10 +287,10 @@ workflows:
             - "Scan image via Snyk on amd64"
             - "Testing Python Code"
       - push-image:
-          name: "Pushing ppc64le Image"
+          name: "Pushing << matrix.architecture >>  Image"
           matrix:
             parameters:
-              architecture: ["ppc64le"]
+              architecture: ["ppc64le", "s390x"]
           requires:
             - "Building << matrix.architecture >> Image"
             - "Scan image via Snyk on amd64"
@@ -296,6 +301,7 @@ workflows:
             - "Pushing arm64 Image"
             - "Pushing amd64 Image"
             - "Pushing ppc64le Image"
+            - "Pushing s390x Image"
       - make-manifests:
           name: "Making and Push Manifests"
           requires:
