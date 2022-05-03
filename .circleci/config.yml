@@ -137,6 +137,22 @@ commands:
             ./.ci/manifest.sh --image ${DOCKER_IMAGE} --manifest ${VERSION} --push
             ./.ci/manifest.sh --image ${DOCKER_IMAGE} --manifest latest --push
 
+  deployment:
+    description: "Deploy Multi-Arch Containers"
+    steps:
+      - run:
+          name: Stop All Containers
+          command: docker rm -f \$(docker ps -a -q)" || echo "No Running Containers
+      - run:
+          name: Remove All Containers
+          command: docker rmi -f \$(docker images -q)" || echo "No Images to Remove
+      - run:
+          name: Pull Multi-Arch Container
+          command: docker pull ${DOCKER_NAMESPACE}/${DOCKER_IMAGE}:${VERSION}
+      - run:
+          name: Run Multi-Arch Container
+          command: docker run -d -p 80:8080 ${DOCKER_NAMESPACE}/${DOCKER_IMAGE}:${VERSION}
+
 
 executors:
   browsers-python:
@@ -163,6 +179,13 @@ executors:
     machine: true
     resource_class: crowley-namespace/s390x
 
+  amd64-deployment:
+    machine: true
+    resource_class: crowley-namespace/multi-arch-amd64 
+
+  arm64-deployment:
+    machine: true
+    resource_class: crowley-namespace/multi-arch-arm64 
 
 jobs:
   test-demo:
@@ -252,6 +275,19 @@ jobs:
       RELEASE_BRANCH: main
       SUPPORTED_ARCHITECTURES: "amd64 arm64 ppc64le s390x"
 
+  deploy-container:
+    parameters:
+      architecture:
+        type: executor
+    executor: << parameters.architecture >>
+    steps:
+      - set-build-tools-env
+      - deployment
+    environment:
+      DOCKER_IMAGE: multi-arch-circleci-demo
+      DOCKER_NAMESPACE: jimcrowley
+
+
 workflows:
   demo:
     jobs:
@@ -306,3 +342,10 @@ workflows:
           name: "Making and Push Manifests"
           requires:
             - "Tagging Images"
+      - deploy-container:
+          name: "Deploying Multi-Arch Container"
+          matrix:
+            parameters:
+              architecture: ["s390x", "amd64-deployment", "arm64-deployment"]
+          requires:
+            - "Making and Push Manifests"
