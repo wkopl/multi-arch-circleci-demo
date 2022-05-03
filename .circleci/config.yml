@@ -49,6 +49,7 @@ commands:
       - run:
           name: Saving Docker Image
           command: docker save --output /tmp/docker-images/${DOCKER_NAMESPACE}-${DOCKER_IMAGE}-$(docker version -f {{.Server.Arch}})-${VERSION}-${CIRCLE_SHA1}.tar ${DOCKER_NAMESPACE}/${DOCKER_IMAGE}:$(docker version -f {{.Server.Arch}})-${VERSION}-${CIRCLE_SHA1}
+      - run: ls -lah /tmp/docker-images/
       - persist_to_workspace:
           root: /tmp
           paths:
@@ -57,8 +58,10 @@ commands:
   load-docker-image:
     description: "Loads a Docker image"
     steps:
+      - run: ls -lah /tmp/
       - attach_workspace:
           at: /tmp
+      - run: ls -lah /tmp/docker-images/
       - run:
             name: Loading Docker Image
             command: docker load --input /tmp/docker-images/${DOCKER_NAMESPACE}-${DOCKER_IMAGE}-$(docker version -f {{.Server.Arch}})-${VERSION}-${CIRCLE_SHA1}.tar
@@ -273,20 +276,20 @@ workflows:
           name: "Pushing << matrix.architecture >> Image"
           matrix:
             parameters:
-              architecture: ["arm64", "amd64", "ppc64le"]
+              architecture: ["arm64", "amd64"]
           requires:
-            - test-image
+            - Testing << matrix.architecture >> Image
             - "Scan image via Snyk on amd64"
             - "Testing Python Code"
-      # - push-image:
-      #     name: "Pushing ppc64le Image"
-      #     matrix:
-      #       parameters:
-      #         architecture: ["ppc64le"]
-      #     requires:
-      #       - "Building << matrix.architecture >> Image"
-      #       - "Scan image via Snyk on amd64"
-      #       - "Testing Python Code"
+      - push-image:
+          name: "Pushing ppc64le Image"
+          matrix:
+            parameters:
+              architecture: ["ppc64le"]
+          requires:
+            - "Building << matrix.architecture >> Image"
+            - "Scan image via Snyk on amd64"
+            - "Testing Python Code"
       - tagging-image:
           name: "Tagging Images"
           requires:
