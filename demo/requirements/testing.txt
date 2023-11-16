@@ -9,5 +9,5 @@ typing-extensions==3.10.0.0
 Werkzeug==2.0.1
 zipp==3.4.1
 pytest==6.2.4
-selenium==3.141.0
+selenium==4.15.1
 pytest-flask==1.2.0
